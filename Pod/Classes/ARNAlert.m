@@ -84,6 +84,22 @@ static NSMutableArray   *alertQueueArray_ = nil;
     }
 }
 
++ (void)showNoActionAlertWithTitle:(NSString *)title
+                           message:(NSString *)message
+                       buttonTitle:(NSString *)buttonTitle
+{
+    NSAssert(title && message, @"title and message nothing");
+    
+    if (!buttonTitle || !buttonTitle.length) {
+        buttonTitle = @"OK";
+    }
+    
+    ARNAlert *alert = [[ARNAlert alloc] initWithTitle:title message:message];
+    [alert setCancelTitle:buttonTitle cancelBlock:^(id action) {}];
+    
+    [alert show];
+}
+
 + (void)shoAlertWithTitle:(NSString *)title
                   message:(NSString *)message
         cancelButtonTitle:(NSString *)cancelButtonTitle
@@ -96,9 +112,6 @@ static NSMutableArray   *alertQueueArray_ = nil;
     NSAssert(okButtonTitle && okBlock, @"okButtonTitle and okBlock nothing");
     
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:title message:message];
-    
-    alert.title = title;
-    alert.message = message;
     [alert setCancelTitle:cancelButtonTitle cancelBlock:cancelBlock];
     [alert addActionTitle:okButtonTitle actionBlock:okBlock];
     
@@ -109,8 +122,8 @@ static NSMutableArray   *alertQueueArray_ = nil;
 {
     if (!(self = [super init])) { return nil; }
     
-    self.title = title;
-    self.message = message;
+    self.title      = title;
+    self.message    = message;
     self.blockArray = [NSMutableArray array];
     
     return self;

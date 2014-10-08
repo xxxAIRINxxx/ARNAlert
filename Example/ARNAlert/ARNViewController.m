@@ -28,6 +28,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (IBAction)noActionButtonAlert:(id)sender
+{
+    [ARNAlert showNoActionAlertWithTitle:@"no action title" message:@"no action message" buttonTitle:@"No Acttion"];
+}
+
 - (IBAction)singleButtonAlert:(id)sender
 {
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Title" message:@"test Message"];
@@ -67,6 +72,27 @@
         NSLog(@"cancel Button tapped!");
     }];
     [alert show];
+}
+
+- (IBAction)rollAlert:(id)sender
+{
+    ARNAlert *alert1 = [[ARNAlert alloc] initWithTitle:@"test Title 1" message:@"test Message 1"];
+    [alert1 addActionTitle:@"OK" actionBlock:^(id action) {
+        NSLog(@"1 OK Button tapped!");
+    }];
+    [alert1 show];
+    
+    ARNAlert *alert2 = [[ARNAlert alloc] initWithTitle:@"test Title 2" message:@"test Message 2"];
+    [alert2 addActionTitle:@"OK" actionBlock:^(id action) {
+        NSLog(@"2 OK Button tapped!");
+    }];
+    [alert2 show];
+    
+    ARNAlert *alert3 = [[ARNAlert alloc] initWithTitle:@"test Title 3" message:@"test Message 3"];
+    [alert3 addActionTitle:@"OK" actionBlock:^(id action) {
+        NSLog(@"3 OK Button tapped!");
+    }];
+    [alert3 show];
 }
 
 @end

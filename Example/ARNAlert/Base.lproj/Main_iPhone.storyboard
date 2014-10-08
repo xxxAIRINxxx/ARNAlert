@@ -18,8 +18,8 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bVk-OT-7gX">
-                                <rect key="frame" x="137" y="85" width="41" height="30"/>
-                                <state key="normal" title="single">
+                                <rect key="frame" x="114" y="117" width="93" height="30"/>
+                                <state key="normal" title="Single Button">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
@@ -27,8 +27,8 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YaB-Zf-q41">
-                                <rect key="frame" x="134" y="156" width="48" height="30"/>
-                                <state key="normal" title="double">
+                                <rect key="frame" x="111" y="167" width="99" height="30"/>
+                                <state key="normal" title="Double Button">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
@@ -36,16 +36,34 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OCF-Zc-0Mk">
-                                <rect key="frame" x="137" y="241" width="35" height="30"/>
-                                <state key="normal" title="triple">
+                                <rect key="frame" x="117" y="225" width="87" height="30"/>
+                                <state key="normal" title="Triple Button">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
                                     <action selector="tripleButtonAlert:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="LOg-iJ-QN7"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XLb-d2-n6S">
+                                <rect key="frame" x="126" y="71" width="68" height="30"/>
+                                <state key="normal" title="No Action">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="noActionButtonAlert:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="qUh-VT-Bhj"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FJ9-pf-u7y">
+                                <rect key="frame" x="129" y="276" width="63" height="30"/>
+                                <state key="normal" title="Roll Alert">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="rollAlert:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="XRC-oG-Lpg"/>
+                                </connections>
+                            </button>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="keyboard" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rmQ-Lc-vCt">
-                                <rect key="frame" x="106" y="314" width="97" height="30"/>
+                                <rect key="frame" x="112" y="325" width="97" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>

@@ -12,6 +12,10 @@ typedef void (^ARNAlertBlock)(id action);
 
 @interface ARNAlert : NSObject
 
++ (void)showNoActionAlertWithTitle:(NSString *)title
+                           message:(NSString *)message
+                       buttonTitle:(NSString *)buttonTitle;
+
 + (void)shoAlertWithTitle:(NSString *)title
                   message:(NSString *)message
         cancelButtonTitle:(NSString *)cancelButtonTitle
