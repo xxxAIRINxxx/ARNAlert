@@ -68,19 +68,22 @@ static NSMutableArray   *alertQueueArray_ = nil;
         return;
     }
     
-    if (window_) {
-        if (alertQueueArray_.count) {
-            UIAlertController *alertController = (UIAlertController *)alertQueueArray_[0];
-            [[[self class] parentController] presentViewController:alertController animated:YES completion:nil];
-            [alertQueueArray_ removeObject:alertController];
-        } else {
-            window_.alpha = 0;
-            [window_.rootViewController.view removeFromSuperview];
-            window_.rootViewController = nil;
-            controller_ = nil;
-            UIWindow *mainWindow = [[UIApplication sharedApplication].delegate window];
-            [mainWindow makeKeyAndVisible];
-        }
+    if (!window_) {
+        return;
+    }
+    
+    if (alertQueueArray_.count) {
+        UIAlertController *alertController = (UIAlertController *)alertQueueArray_[0];
+        [[[self class] parentController] presentViewController:alertController animated:YES completion:nil];
+        [alertQueueArray_ removeObject:alertController];
+    } else {
+        window_.alpha = 0;
+        [window_.rootViewController.view removeFromSuperview];
+        window_.rootViewController = nil;
+        controller_ = nil;
+        window_     = nil;
+        UIWindow *mainWindow = [[UIApplication sharedApplication].delegate window];
+        [mainWindow makeKeyAndVisible];
     }
 }
 
@@ -88,7 +91,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
                            message:(NSString *)message
                        buttonTitle:(NSString *)buttonTitle
 {
-    NSAssert(title && message, @"title and message nothing");
+    NSAssert(title || message, @"title and message nothing");
     
     if (!buttonTitle || !buttonTitle.length) {
         buttonTitle = @"OK";
@@ -107,9 +110,9 @@ static NSMutableArray   *alertQueueArray_ = nil;
             okButtonTitle:(NSString *)okButtonTitle
                   okBlock:(ARNAlertBlock)okBlock
 {
-    NSAssert(title && message, @"title and message nothing");
-    NSAssert(cancelButtonTitle && cancelBlock, @"cancelButtonTitle and cancelBlock nothing");
-    NSAssert(okButtonTitle && okBlock, @"okButtonTitle and okBlock nothing");
+    NSAssert(title || message, @"title and message nothing");
+    NSAssert(cancelButtonTitle || cancelBlock, @"cancelButtonTitle and cancelBlock nothing");
+    NSAssert(okButtonTitle || okBlock, @"okButtonTitle and okBlock nothing");
     
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:title message:message];
     [alert setCancelTitle:cancelButtonTitle cancelBlock:cancelBlock];
