@@ -11,6 +11,61 @@ Wrapper of UIAlertView & UIAlertController.
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
+### Show No Action Alert
+
+```objective-c
+
+	[ARNAlert showNoActionAlertWithTitle:@"no action title" message:@"no action message" buttonTitle:@"No Acttion"];
+
+	// iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
+	// iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+
+```
+
+### Show Simple Action Alert
+
+```objective-c
+
+	[ARNAlert shoAlertWithTitle:@"test Title"
+                        message:@"test Message"
+              cancelButtonTitle:@"Cancel"
+                    cancelBlock:^(id action){
+                        NSLog(@"cancelBlock call!");
+
+                        // iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
+						// iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+                    }
+                  okButtonTitle:@"OK"
+                        okBlock:^(id action){
+          				NSLog(@"okBlock call!");
+
+                        // iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
+        				// iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+                        }];
+
+```
+
+### Show Some Action Alert
+
+```objective-c
+
+    ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Title" message:@"test Message"];
+    [alert addActionTitle:@"button" actionBlock:^(id action) {
+        NSLog(@"button Button tapped!");
+
+        // iOS8 >= : UIAlertController addAction(UIAlertActionStyleDefault)
+        // iOS7 <= : UIAlertView bk_addButtonWithTitle(BlocksKit)
+    }];
+    [alert setCancelTitle:@"cancel" cancelBlock:^(id action) {
+        NSLog(@"cancel Button tapped!");
+
+        // iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
+        // iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+    }];
+    [alert show];
+
+```
+
 ## Requirements
 
 * iOS 7.0+
