@@ -26,6 +26,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
 @property (nonatomic, copy) NSString         *cancelTitle;
 @property (nonatomic, copy) ARNAlertBlock     cancelBlock;
 @property (nonatomic, strong) NSMutableArray *blockArray;
+@property (nonatomic, strong) NSMutableArray *textFields;
 
 @end
 
@@ -128,6 +129,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
     self.title      = title;
     self.message    = message;
     self.blockArray = [NSMutableArray array];
+    self.textFields = [NSMutableArray array];
     
     return self;
 }
@@ -149,6 +151,26 @@ static NSMutableArray   *alertQueueArray_ = nil;
     [self.blockArray addObject:@{[actionTitle copy]: [actionBlock copy]}];
 }
 
+// iOS7 is Only One Block
+- (void)addTextFieldWithPlaceholder:(NSString *)placeholder
+                     alertViewStyle:(UIAlertViewStyle)alertViewStyle // use iOS7 only
+                        actionBlock:(ARNAlertBlock)actionBlock
+{
+    if (!actionBlock) {
+        return;
+    }
+    if (!placeholder) {
+        placeholder = @"";
+    }
+    
+    if ([[self class] isiOS8orLater]) {
+        [self.textFields addObject:@{[placeholder copy]: [actionBlock copy]}];
+    } else {
+        self.textFields = [NSMutableArray array];
+        [self.textFields addObject:@{[placeholder copy]: @(alertViewStyle), @"TextFieldBlock" : [actionBlock copy]}];
+    }
+}
+
 - (void)shoAlertWithTitle:(NSString *)title
                   message:(NSString *)messages
 {
@@ -158,7 +180,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
     if (!self.message) {
         self.message = @"";
     }
-    if (!self.cancelTitle || !self.cancelTitle.length) {
+    if (self.cancelBlock && (!self.cancelTitle || !self.cancelTitle.length)) {
         self.cancelTitle = @"Cancel";
     }
     
@@ -187,10 +209,32 @@ static NSMutableArray   *alertQueueArray_ = nil;
                                                                   block(action);
                                                               }]];
         }
+        
+        if (self.textFields.count) {
+            for (int ai = 0; ai < self.textFields.count; ++ai) {
+                NSDictionary *blockDict = self.textFields[ai];
+                NSString *placeholder = [(NSString *)blockDict.allKeys[0] copy];
+                [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+                    textField.placeholder = placeholder;
+                    textField.bk_didEndEditingBlock = ^(UITextField *textField) {
+                        void (^block)() = blockDict[placeholder];
+                        block(textField);
+                    };
+                }];
+            }
+            if (!self.blockArray.count) {
+                [alertController addAction:[UIAlertAction actionWithTitle:@"OK"
+                                                                    style:UIAlertActionStyleDefault
+                                                                  handler:^(UIAlertAction *action) {
+                                                                      [ARNAlert dismiss];
+                                                                  }]];
+            }
+        }
+        
         if ([[self class] parentController].presentedViewController) {
             [alertQueueArray_ addObject:alertController];
         } else {
-           [[[self class] parentController] presentViewController:alertController animated:YES completion:nil];
+            [[[self class] parentController] presentViewController:alertController animated:YES completion:nil];
         }
     } else {
         UIAlertView *alert = [UIAlertView bk_alertViewWithTitle:self.title message:self.message];
@@ -210,6 +254,22 @@ static NSMutableArray   *alertQueueArray_ = nil;
                 void (^block)() = blockDict[key];
                 block(nil);
             }];
+        }
+        
+        if (self.textFields.count) {
+            NSDictionary *blockDict = self.textFields[0];
+            NSNumber *key = (NSNumber *)blockDict[blockDict.allKeys[0]];
+            [alert setAlertViewStyle:key.integerValue];
+            [alert bk_setWillDismissBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
+                void (^block)() = blockDict[@"TextFieldBlock"];
+                block(alertView);
+            }];
+            
+            if (!self.blockArray.count) {
+                [alert bk_addButtonWithTitle:@"OK" handler:^{
+                    [ARNAlert dismiss];
+                }];
+            }
         }
         
         [alert show];

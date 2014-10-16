@@ -36,7 +36,7 @@
 - (IBAction)singleButtonAlert:(id)sender
 {
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Title" message:@"test Message"];
-    [alert addActionTitle:@"OK" actionBlock:^(id action) {
+    [alert addActionTitle:@"OK" actionBlock:^(id resultObj) {
         NSLog(@"OK Button tapped!");
     }];
     [alert show];
@@ -47,11 +47,11 @@
     [ARNAlert shoAlertWithTitle:@"test Title"
                         message:@"test Message"
               cancelButtonTitle:@"Cancel"
-                    cancelBlock:^(id action){
+                    cancelBlock:^(id resultObj){
                         NSLog(@"cancelBlock call!");
                     }
                   okButtonTitle:@"OK"
-                        okBlock:^(id action){
+                        okBlock:^(id resultObj){
                             NSLog(@"okBlock call!");
                         }];
 }
@@ -59,16 +59,16 @@
 - (IBAction)tripleButtonAlert:(id)sender
 {
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Title" message:@"test Message"];
-    [alert addActionTitle:@"button1" actionBlock:^(id action) {
+    [alert addActionTitle:@"button1" actionBlock:^(id resultObj) {
         NSLog(@"button1 Button tapped!");
     }];
-    [alert addActionTitle:@"button2" actionBlock:^(id action) {
+    [alert addActionTitle:@"button2" actionBlock:^(id resultObj) {
         NSLog(@"button2 Button tapped!");
     }];
-    [alert addActionTitle:@"button3" actionBlock:^(id action) {
+    [alert addActionTitle:@"button3" actionBlock:^(id resultObj) {
         NSLog(@"button3 Button tapped!");
     }];
-    [alert setCancelTitle:@"cancel" cancelBlock:^(id action) {
+    [alert setCancelTitle:@"cancel" cancelBlock:^(id resultObj) {
         NSLog(@"cancel Button tapped!");
     }];
     [alert show];
@@ -77,22 +77,45 @@
 - (IBAction)rollAlert:(id)sender
 {
     ARNAlert *alert1 = [[ARNAlert alloc] initWithTitle:@"test Title 1" message:@"test Message 1"];
-    [alert1 addActionTitle:@"OK" actionBlock:^(id action) {
+    [alert1 addActionTitle:@"OK" actionBlock:^(id resultObj) {
         NSLog(@"1 OK Button tapped!");
     }];
     [alert1 show];
     
     ARNAlert *alert2 = [[ARNAlert alloc] initWithTitle:@"test Title 2" message:@"test Message 2"];
-    [alert2 addActionTitle:@"OK" actionBlock:^(id action) {
+    [alert2 addActionTitle:@"OK" actionBlock:^(id resultObj) {
         NSLog(@"2 OK Button tapped!");
     }];
     [alert2 show];
     
     ARNAlert *alert3 = [[ARNAlert alloc] initWithTitle:@"test Title 3" message:@"test Message 3"];
-    [alert3 addActionTitle:@"OK" actionBlock:^(id action) {
+    [alert3 addActionTitle:@"OK" actionBlock:^(id resultObj) {
         NSLog(@"3 OK Button tapped!");
     }];
     [alert3 show];
+}
+
+- (IBAction)textAlert:(id)sender
+{
+    if ( ([[[UIDevice currentDevice] systemVersion] compare:@"8" options:NSNumericSearch] != NSOrderedAscending)) {
+        ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
+        [alert addTextFieldWithPlaceholder:@"place1" alertViewStyle:0 actionBlock:^(UITextField *texitField) {
+            NSLog(@"texitField1.text : %@", texitField.text);
+        }];
+        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:0 actionBlock:^(UITextField *texitField) {
+            NSLog(@"texitField2.text : %@", texitField.text);
+        }];
+        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:0 actionBlock:^(UITextField *texitField) {
+            NSLog(@"texitField3.text : %@", texitField.text);
+        }];
+        [alert show];
+    } else {
+        ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
+        [alert addTextFieldWithPlaceholder:@"place" alertViewStyle:UIAlertViewStylePlainTextInput actionBlock:^(id resultObj) {
+            NSLog(@"texitField.text : %@", [[(UIAlertView *)resultObj textFieldAtIndex:0] text]);
+        }];
+        [alert show];
+    }
 }
 
 @end

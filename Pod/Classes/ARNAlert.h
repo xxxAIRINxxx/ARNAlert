@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void (^ARNAlertBlock)(id action);
+typedef void (^ARNAlertBlock)(id resultObj);
 
 @interface ARNAlert : NSObject
 
@@ -30,6 +30,11 @@ typedef void (^ARNAlertBlock)(id action);
 
 - (void)addActionTitle:(NSString *)actionTitle
            actionBlock:(ARNAlertBlock)actionBlock;
+
+// iOS7 is Only One Block
+- (void)addTextFieldWithPlaceholder:(NSString *)placeholder
+                     alertViewStyle:(UIAlertViewStyle)alertViewStyle // use iOS7 only
+                        actionBlock:(ARNAlertBlock)actionBlock;
 
 - (void)show;
 

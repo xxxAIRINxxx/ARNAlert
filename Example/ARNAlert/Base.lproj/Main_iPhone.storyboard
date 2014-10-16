@@ -63,10 +63,19 @@
                                 </connections>
                             </button>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="keyboard" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rmQ-Lc-vCt">
-                                <rect key="frame" x="112" y="325" width="97" height="30"/>
+                                <rect key="frame" x="112" y="361" width="97" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Pg-53-smS">
+                                <rect key="frame" x="145" y="319" width="30" height="30"/>
+                                <state key="normal" title="Text">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="textAlert:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="4uy-Is-95t"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
