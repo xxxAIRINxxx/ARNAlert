@@ -166,8 +166,9 @@ static NSMutableArray   *alertQueueArray_ = nil;
     if ([[self class] isiOS8orLater]) {
         [self.textFields addObject:@{[placeholder copy]: [actionBlock copy]}];
     } else {
-        self.textFields = [NSMutableArray array];
-        [self.textFields addObject:@{[placeholder copy]: @(alertViewStyle), @"TextFieldBlock" : [actionBlock copy]}];
+        [self.textFields removeAllObjects];
+        [self.textFields addObject:@{@"AlertViewStyle": @(alertViewStyle),
+                                     @"TextFieldBlock" : [actionBlock copy]}];
     }
 }
 
@@ -258,7 +259,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
         
         if (self.textFields.count) {
             NSDictionary *blockDict = self.textFields[0];
-            NSNumber *key = (NSNumber *)blockDict[blockDict.allKeys[0]];
+            NSNumber *key = (NSNumber *)blockDict[@"AlertViewStyle"];
             [alert setAlertViewStyle:key.integerValue];
             [alert bk_setWillDismissBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
                 void (^block)() = blockDict[@"TextFieldBlock"];

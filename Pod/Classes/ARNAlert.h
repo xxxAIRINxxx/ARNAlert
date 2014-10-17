@@ -32,7 +32,7 @@ typedef void (^ARNAlertBlock)(id resultObj);
            actionBlock:(ARNAlertBlock)actionBlock;
 
 // iOS7 is Only One Block
-- (void)addTextFieldWithPlaceholder:(NSString *)placeholder
+- (void)addTextFieldWithPlaceholder:(NSString *)placeholder // use iOS8 only
                      alertViewStyle:(UIAlertViewStyle)alertViewStyle // use iOS7 only
                         actionBlock:(ARNAlertBlock)actionBlock;
 

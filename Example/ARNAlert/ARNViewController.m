@@ -111,8 +111,20 @@
         [alert show];
     } else {
         ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
-        [alert addTextFieldWithPlaceholder:@"place" alertViewStyle:UIAlertViewStylePlainTextInput actionBlock:^(id resultObj) {
+        [alert addTextFieldWithPlaceholder:@"place1" alertViewStyle:UIAlertViewStylePlainTextInput actionBlock:^(id resultObj) {
             NSLog(@"texitField.text : %@", [[(UIAlertView *)resultObj textFieldAtIndex:0] text]);
+        }];
+        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:UIAlertViewStylePlainTextInput actionBlock:^(id resultObj) {
+            NSLog(@"texitField.text : %@", [[(UIAlertView *)resultObj textFieldAtIndex:0] text]);
+        }];
+        [alert addActionTitle:@"button1" actionBlock:^(id resultObj) {
+            NSLog(@"button1 tapped!");
+        }];
+        [alert addActionTitle:@"button2" actionBlock:^(id resultObj) {
+            NSLog(@"button2 tapped!");
+        }];
+        [alert setCancelTitle:@"Cancel" cancelBlock:^(id resultObj) {
+            NSLog(@"cancel Button tapped!");
         }];
         [alert show];
     }
