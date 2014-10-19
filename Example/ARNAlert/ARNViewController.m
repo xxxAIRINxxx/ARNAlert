@@ -19,7 +19,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+    // Do any additional setup after loading the view, typically from a nib.
 }
 
 - (void)didReceiveMemoryWarning
@@ -98,34 +98,61 @@
 - (IBAction)textAlert:(id)sender
 {
     if ( ([[[UIDevice currentDevice] systemVersion] compare:@"8" options:NSNumericSearch] != NSOrderedAscending)) {
+        
         ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
-        [alert addTextFieldWithPlaceholder:@"place1" alertViewStyle:0 actionBlock:^(UITextField *texitField) {
+        
+        [alert addTextFieldWithPlaceholder:@"place1" alertViewStyle:0 actionBlock:^(UITextField *texitField, id resultObj) {
             NSLog(@"texitField1.text : %@", texitField.text);
         }];
-        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:0 actionBlock:^(UITextField *texitField) {
+        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:0 actionBlock:^(UITextField *texitField, id resultObj) {
             NSLog(@"texitField2.text : %@", texitField.text);
         }];
-        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:0 actionBlock:^(UITextField *texitField) {
+        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:0 actionBlock:^(UITextField *texitField, id resultObj) {
             NSLog(@"texitField3.text : %@", texitField.text);
         }];
+        
         [alert show];
     } else {
         ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
-        [alert addTextFieldWithPlaceholder:@"place1" alertViewStyle:UIAlertViewStylePlainTextInput actionBlock:^(id resultObj) {
-            NSLog(@"texitField.text : %@", [[(UIAlertView *)resultObj textFieldAtIndex:0] text]);
-        }];
-        [alert addTextFieldWithPlaceholder:@"place2" alertViewStyle:UIAlertViewStylePlainTextInput actionBlock:^(id resultObj) {
-            NSLog(@"texitField.text : %@", [[(UIAlertView *)resultObj textFieldAtIndex:0] text]);
-        }];
-        [alert addActionTitle:@"button1" actionBlock:^(id resultObj) {
-            NSLog(@"button1 tapped!");
-        }];
-        [alert addActionTitle:@"button2" actionBlock:^(id resultObj) {
-            NSLog(@"button2 tapped!");
-        }];
-        [alert setCancelTitle:@"Cancel" cancelBlock:^(id resultObj) {
-            NSLog(@"cancel Button tapped!");
-        }];
+        
+        [alert addTextFieldWithPlaceholder:@"place1"
+                            alertViewStyle:UIAlertViewStylePlainTextInput
+                               actionBlock:^(UITextField *texitField, id resultObj) {
+                                   NSLog(@"texitField UIAlertViewStylePlainTextInput!");
+                                   NSLog(@"texitField.text : %@", texitField.text);
+                               }];
+        [alert addTextFieldWithPlaceholder:@"place2"
+                            alertViewStyle:UIAlertViewStyleLoginAndPasswordInput
+                               actionBlock:^(UITextField *texitField, id resultObj) {
+                                   NSLog(@"texitField UIAlertViewStyleLoginAndPasswordInput!");
+                                   NSLog(@"texitField.text : %@", texitField.text);
+                               }];
+        
+        [alert addActionTitle:@"button1"
+                  actionBlock:^(UIAlertView *alertView) {
+                      NSLog(@"button1 tapped!");
+                      UITextField *textField0 = [alertView textFieldAtIndex:0];
+                      UITextField *textField1 = [alertView textFieldAtIndex:1];
+                      NSLog(@"texitField0.text : %@", textField0.text);
+                      NSLog(@"texitField1.text : %@", textField1.text);
+                  }];
+        [alert addActionTitle:@"button2"
+                  actionBlock:^(UIAlertView *alertView) {
+                      NSLog(@"button2 tapped!");
+                      UITextField *textField0 = [alertView textFieldAtIndex:0];
+                      UITextField *textField1 = [alertView textFieldAtIndex:1];
+                      NSLog(@"texitField0.text : %@", textField0.text);
+                      NSLog(@"texitField1.text : %@", textField1.text);
+                  }];
+        [alert setCancelTitle:@"Cancel"
+                  cancelBlock:^(UIAlertView *alertView) {
+                      NSLog(@"cancel Button tapped!");
+                      UITextField *textField0 = [alertView textFieldAtIndex:0];
+                      UITextField *textField1 = [alertView textFieldAtIndex:1];
+                      NSLog(@"texitField0.text : %@", textField0.text);
+                      NSLog(@"texitField1.text : %@", textField1.text);
+                  }];
+        
         [alert show];
     }
 }

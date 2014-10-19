@@ -153,8 +153,8 @@ static NSMutableArray   *alertQueueArray_ = nil;
 
 // iOS7 is Only One Block
 - (void)addTextFieldWithPlaceholder:(NSString *)placeholder
-                     alertViewStyle:(UIAlertViewStyle)alertViewStyle // use iOS7 only
-                        actionBlock:(ARNAlertBlock)actionBlock
+                     alertViewStyle:(UIAlertViewStyle)alertViewStyle
+                        actionBlock:(ARNAlertTextFieldBlock)actionBlock
 {
     if (!actionBlock) {
         return;
@@ -218,8 +218,8 @@ static NSMutableArray   *alertQueueArray_ = nil;
                 [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
                     textField.placeholder = placeholder;
                     textField.bk_didEndEditingBlock = ^(UITextField *textField) {
-                        void (^block)() = blockDict[placeholder];
-                        block(textField);
+                        ARNAlertTextFieldBlock block = blockDict[placeholder];
+                        block(textField, nil);
                     };
                 }];
             }
@@ -242,8 +242,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
         if (self.cancelBlock) {
             void (^block)() = [self.cancelBlock copy];
             [alert bk_setCancelButtonWithTitle:self.cancelTitle handler:^{
-                [ARNAlert dismiss];
-                block(nil);
+                block(alert);
             }];
         }
         
@@ -251,9 +250,8 @@ static NSMutableArray   *alertQueueArray_ = nil;
             NSDictionary *blockDict = self.blockArray[i];
             NSString *key = [(NSString *)blockDict.allKeys[0] copy];
             [alert bk_addButtonWithTitle:key handler:^{
-                [ARNAlert dismiss];
                 void (^block)() = blockDict[key];
-                block(nil);
+                block(alert);
             }];
         }
         
@@ -261,14 +259,27 @@ static NSMutableArray   *alertQueueArray_ = nil;
             NSDictionary *blockDict = self.textFields[0];
             NSNumber *key = (NSNumber *)blockDict[@"AlertViewStyle"];
             [alert setAlertViewStyle:key.integerValue];
-            [alert bk_setWillDismissBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
-                void (^block)() = blockDict[@"TextFieldBlock"];
-                block(alertView);
+            [alert bk_setDidShowBlock:^(UIAlertView *alertView) {
+                
+                ARNAlertTextFieldBlock block = blockDict[@"TextFieldBlock"];
+                if ([alertView textFieldAtIndex:0]) {
+                    UITextField *textField = [alertView textFieldAtIndex:0];
+                    textField.bk_shouldEndEditingBlock = ^(UITextField *textField) {
+                        block(textField, @0);
+                        return YES;
+                    };
+                }
+                if (key.integerValue == UIAlertViewStyleLoginAndPasswordInput) {
+                    UITextField *textField = [alertView textFieldAtIndex:1];
+                    textField.bk_shouldEndEditingBlock = ^(UITextField *textField) {
+                        block(textField, @1);
+                        return YES;
+                    };
+                }
             }];
             
             if (!self.blockArray.count) {
                 [alert bk_addButtonWithTitle:@"OK" handler:^{
-                    [ARNAlert dismiss];
                 }];
             }
         }

@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 typedef void (^ARNAlertBlock)(id resultObj);
+typedef void (^ARNAlertTextFieldBlock)(UITextField *textField, id resultObj);
 
 @interface ARNAlert : NSObject
 
@@ -31,10 +32,11 @@ typedef void (^ARNAlertBlock)(id resultObj);
 - (void)addActionTitle:(NSString *)actionTitle
            actionBlock:(ARNAlertBlock)actionBlock;
 
+// TODO : 残念な感じ...
 // iOS7 is Only One Block
 - (void)addTextFieldWithPlaceholder:(NSString *)placeholder // use iOS8 only
                      alertViewStyle:(UIAlertViewStyle)alertViewStyle // use iOS7 only
-                        actionBlock:(ARNAlertBlock)actionBlock;
+                        actionBlock:(ARNAlertTextFieldBlock)actionBlock;
 
 - (void)show;
 
