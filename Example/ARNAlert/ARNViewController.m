@@ -101,18 +101,18 @@
     
     [alert addTextFieldWithPlaceholder:@"place1"
                         alertViewStyle:UIAlertViewStylePlainTextInput
-                           actionBlock:^(UITextField *texitField) {
+                           actionBlock:^(UITextField *texitField, NSNumber *index) {
                                NSLog(@"place1 texitField : %@", texitField.text);
                            }];
     [alert addTextFieldWithPlaceholder:@"place2"
                         alertViewStyle:UIAlertViewStyleLoginAndPasswordInput
-                           actionBlock:^(UITextField *texitField) {
+                           actionBlock:^(UITextField *texitField, NSNumber *index) {
                                NSLog(@"place2 texitField : %@", texitField.text);
                            }];
     
     [alert addTextFieldWithPlaceholder:@"place3"
                         alertViewStyle:UIAlertViewStyleLoginAndPasswordInput
-                           actionBlock:^(UITextField *texitField) {
+                           actionBlock:^(UITextField *texitField, NSNumber *index) {
                                NSLog(@"place3 texitField : %@", texitField.text);
                            }];
     
