@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 typedef void (^ARNAlertBlock)(id resultObj);
-typedef void (^ARNAlertTextFieldBlock)(UITextField *textField, id resultObj);
+typedef void (^ARNAlertTextFieldBlock)(UITextField *textField, NSNumber *index);
 
 @interface ARNAlert : NSObject
 
