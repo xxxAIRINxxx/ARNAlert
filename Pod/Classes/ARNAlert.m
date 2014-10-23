@@ -142,6 +142,9 @@ static NSMutableArray   *alertQueueArray_ = nil;
 - (void)setCancelTitle:(NSString *)cancelTitle
            cancelBlock:(ARNAlertBlock)cancelBlock
 {
+    if (cancelTitle && !cancelBlock) {
+        cancelBlock = ^(id resultObj){};
+    }
     self.cancelTitle = cancelTitle;
     self.cancelBlock = cancelBlock;
 }
@@ -151,6 +154,9 @@ static NSMutableArray   *alertQueueArray_ = nil;
 {
     if (!actionTitle || !actionBlock) {
         return;
+    }
+    if (actionTitle && !actionBlock) {
+        actionBlock = ^(id resultObj){};
     }
     
     [self.blockArray addObject:@{[actionTitle copy]: [actionBlock copy]}];
@@ -167,7 +173,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
     if (!placeholder) {
         placeholder = @"";
     }
-
+    
     if ([[self class] isiOS8orLater]) {
         [self.textFieldBlockArray addObject:@{kARNAlertPlaceholderKey : [placeholder copy],
                                               kARNAlertTextFieldBlockKey : [actionBlock copy]}];
