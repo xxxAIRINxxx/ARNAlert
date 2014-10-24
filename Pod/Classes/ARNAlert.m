@@ -14,7 +14,6 @@
 #error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-
 static NSString * const kARNAlertAlertViewStyleKey = @"ARNAlertAlertViewStyleKey";
 static NSString * const kARNAlertTextFieldBlockKey = @"ARNAlertTextFieldBlockKey";
 static NSString * const kARNAlertPlaceholderKey    = @"ARNAlertPlaceholderKey";
@@ -97,8 +96,6 @@ static NSMutableArray   *alertQueueArray_ = nil;
                            message:(NSString *)message
                        buttonTitle:(NSString *)buttonTitle
 {
-    NSAssert(title || message, @"title and message nothing");
-    
     if (!buttonTitle || !buttonTitle.length) {
         buttonTitle = @"OK";
     }
@@ -116,12 +113,12 @@ static NSMutableArray   *alertQueueArray_ = nil;
             okButtonTitle:(NSString *)okButtonTitle
                   okBlock:(ARNAlertBlock)okBlock
 {
-    NSAssert(title || message, @"title and message nothing");
-    NSAssert(cancelButtonTitle || cancelBlock, @"cancelButtonTitle and cancelBlock nothing");
-    NSAssert(okButtonTitle || okBlock, @"okButtonTitle and okBlock nothing");
-    
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:title message:message];
-    [alert setCancelTitle:cancelButtonTitle cancelBlock:cancelBlock];
+    
+    if (cancelBlock) {
+        [alert setCancelTitle:cancelButtonTitle cancelBlock:cancelBlock];
+    }
+    
     [alert addActionTitle:okButtonTitle actionBlock:okBlock];
     
     [alert show];
@@ -142,9 +139,6 @@ static NSMutableArray   *alertQueueArray_ = nil;
 - (void)setCancelTitle:(NSString *)cancelTitle
            cancelBlock:(ARNAlertBlock)cancelBlock
 {
-    if (cancelTitle && !cancelBlock) {
-        cancelBlock = ^(id resultObj){};
-    }
     self.cancelTitle = cancelTitle;
     self.cancelBlock = cancelBlock;
 }
@@ -152,13 +146,12 @@ static NSMutableArray   *alertQueueArray_ = nil;
 - (void)addActionTitle:(NSString *)actionTitle
            actionBlock:(ARNAlertBlock)actionBlock
 {
-    if (!actionTitle || !actionBlock) {
+    if (!actionTitle || !actionTitle.length) {
         return;
     }
-    if (actionTitle && !actionBlock) {
+    if (!actionBlock) {
         actionBlock = ^(id resultObj){};
     }
-    
     [self.blockArray addObject:@{[actionTitle copy]: [actionBlock copy]}];
 }
 
@@ -194,6 +187,10 @@ static NSMutableArray   *alertQueueArray_ = nil;
     if (!self.message) {
         self.message = @"";
     }
+    
+    NSAssert(self.title || self.message, @"title and message nothing");
+    NSAssert(self.title.length || self.message.length, @"title and message noLength");
+    
     if (self.cancelBlock && (!self.cancelTitle || !self.cancelTitle.length)) {
         self.cancelTitle = @"Cancel";
     }
@@ -253,6 +250,14 @@ static NSMutableArray   *alertQueueArray_ = nil;
                                                                   } else {
                                                                       block(action);
                                                                   }
+                                                              }]];
+        }
+        
+        if (!alertController.actions.count) {
+            [alertController addAction:[UIAlertAction actionWithTitle:@"OK"
+                                                                style:UIAlertActionStyleCancel
+                                                              handler:^(UIAlertAction *action) {
+                                                                  [ARNAlert dismiss];
                                                               }]];
         }
         
