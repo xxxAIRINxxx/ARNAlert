@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "ARNAlert"
-  s.version          = "0.1.1"
+  s.version          = "0.1.2"
   s.summary          = "Wrapper of UIAlertView & UIAlertController."
   s.homepage         = "https://github.com/xxxAIRINxxx/ARNAlert"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
