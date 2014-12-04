@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "ARNAlert"
-  s.version          = "0.1.0"
+  s.version          = "0.2.0"
   s.summary          = "Wrapper of UIAlertView & UIAlertController."
   s.homepage         = "https://github.com/xxxAIRINxxx/ARNAlert"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
@@ -28,5 +28,4 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  s.dependency 'BlocksKit'
 end

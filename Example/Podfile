@@ -2,13 +2,11 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 target 'ARNAlert', :exclusive => true do
   pod "ARNAlert", :path => "../"
-  pod 'BlocksKit'
 end
 
 target 'Tests', :exclusive => true do
   pod "ARNAlert", :path => "../"
 
-  pod 'BlocksKit'
   pod 'Specta', '~> 0.2.1'
   pod 'Expecta'
   pod 'FBSnapshotTestCase'
