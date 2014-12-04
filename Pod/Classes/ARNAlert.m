@@ -346,7 +346,7 @@ static NSMutableArray   *alertQueueArray_  = nil;
     if (self.textFieldBlockArray.count) {
         NSMutableArray *textFields = [NSMutableArray array];
         
-        for (NSUInteger i = 0; i < 2; ++i) {
+        for (NSUInteger i = 0; i < self.textFieldBlockArray.count; ++i) {
             UITextField *textField = [alertView textFieldAtIndex:i];
             if (textField) {
                 [textFields addObject:textField];
