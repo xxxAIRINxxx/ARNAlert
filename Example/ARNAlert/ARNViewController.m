@@ -99,22 +99,10 @@
 {
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
     
-    [alert addTextFieldWithPlaceholder:@"place1"
-                        alertViewStyle:UIAlertViewStylePlainTextInput
-                           actionBlock:^(UITextField *texitField, NSNumber *index) {
-                               NSLog(@"place1 texitField : %@", texitField.text);
-                           }];
-    [alert addTextFieldWithPlaceholder:@"place2"
-                        alertViewStyle:UIAlertViewStyleLoginAndPasswordInput
-                           actionBlock:^(UITextField *texitField, NSNumber *index) {
-                               NSLog(@"place2 texitField : %@", texitField.text);
-                           }];
-    
-    [alert addTextFieldWithPlaceholder:@"place3"
-                        alertViewStyle:UIAlertViewStyleLoginAndPasswordInput
-                           actionBlock:^(UITextField *texitField, NSNumber *index) {
-                               NSLog(@"place3 texitField : %@", texitField.text);
-                           }];
+    [alert addTextFieldWithPlaceholder:@"place1"];
+    [alert addTextFieldWithPlaceholder:@"place2"];
+    // iOS7 is Nothing
+    [alert addTextFieldWithPlaceholder:@"place3"];
     
     [alert addActionTitle:@"button1"
               actionBlock:^(NSArray *texitFields) {

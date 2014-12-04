@@ -9,7 +9,13 @@
 #import <Foundation/Foundation.h>
 
 typedef void (^ARNAlertBlock)(id resultObj);
-typedef void (^ARNAlertTextFieldBlock)(UITextField *textField, NSNumber *index);
+
+@interface ARNAlertObject : NSObject
+
+@property (nonatomic, copy) NSString     *title;
+@property (nonatomic, copy) ARNAlertBlock block;
+
+@end
 
 @interface ARNAlert : NSObject
 
@@ -24,7 +30,7 @@ typedef void (^ARNAlertTextFieldBlock)(UITextField *textField, NSNumber *index);
             okButtonTitle:(NSString *)okButtonTitle
                   okBlock:(ARNAlertBlock)okBlock;
 
-- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message;
+- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message NS_DESIGNATED_INITIALIZER;
 
 - (void)setCancelTitle:(NSString *)cancelTitle
            cancelBlock:(ARNAlertBlock)cancelBlock;
@@ -32,11 +38,8 @@ typedef void (^ARNAlertTextFieldBlock)(UITextField *textField, NSNumber *index);
 - (void)addActionTitle:(NSString *)actionTitle
            actionBlock:(ARNAlertBlock)actionBlock;
 
-// TODO : 残念な感じ...
-// iOS7 is Only One Block
-- (void)addTextFieldWithPlaceholder:(NSString *)placeholder // use iOS8 only
-                     alertViewStyle:(UIAlertViewStyle)alertViewStyle // use iOS7 only
-                        actionBlock:(ARNAlertTextFieldBlock)actionBlock;
+// iOS7 is Max 2 Fields (1 : UIAlertViewStylePlainTextInput, 2 : UIAlertViewStyleLoginAndPasswordInput)
+- (void)addTextFieldWithPlaceholder:(NSString *)placeholder;
 
 - (void)show;
 

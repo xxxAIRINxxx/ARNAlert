@@ -17,8 +17,8 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 [ARNAlert showNoActionAlertWithTitle:@"no action title" message:@"no action message" buttonTitle:@"No Acttion"];
 
-// iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
-// iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+// iOS8 : UIAlertController addAction(UIAlertActionStyleCancel)
+// iOS7 : UIAlertView clickedButtonAtIndex(cancelButtonIndex)
 
 ```
 
@@ -32,15 +32,15 @@ To run the example project, clone the repo, and run `pod install` from the Examp
                 cancelBlock:^(id action){
                     NSLog(@"cancelBlock call!");
 
-                    // iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
-					// iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+                    // iOS8 : UIAlertController addAction(UIAlertActionStyleCancel)
+					// iOS7 : UIAlertView clickedButtonAtIndex(cancelButtonIndex)
                 }
               okButtonTitle:@"OK"
                     okBlock:^(id action){
           			NSLog(@"okBlock call!");
 
-                    // iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
-      				// iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+                    // iOS8 : UIAlertController addAction(UIAlertActionStyleDefault)
+      				// iOS7 : UIAlertView clickedButtonAtIndex(buttonIndex)
                     }];
 
 ```
@@ -53,14 +53,14 @@ ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Title" message:@"test M
 [alert addActionTitle:@"button" actionBlock:^(id action) {
     NSLog(@"button Button tapped!");
 
-    // iOS8 >= : UIAlertController addAction(UIAlertActionStyleDefault)
-    // iOS7 <= : UIAlertView bk_addButtonWithTitle(BlocksKit)
+    // iOS8 : UIAlertController addAction(UIAlertActionStyleDefault)
+    // iOS7 : UIAlertView clickedButtonAtIndex(buttonIndex)
 }];
 [alert setCancelTitle:@"cancel" cancelBlock:^(id action) {
     NSLog(@"cancel Button tapped!");
 
-    // iOS8 >= : UIAlertController addAction(UIAlertActionStyleCancel)
-    // iOS7 <= : UIAlertView  bk_setCancelButtonWithTitle(BlocksKit)
+    // iOS8 : UIAlertController addAction(UIAlertActionStyleCancel)
+    // iOS7 : UIAlertView  clickedButtonAtIndex(cancelButtonIndex)
 }];
 [alert show];
 
@@ -77,10 +77,6 @@ ARNAlert is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
     pod "ARNAlert"
-
-## Dependency
-
-[BlocksKit](https://github.com/zwaldowski/BlocksKit)
 
 ## License
 

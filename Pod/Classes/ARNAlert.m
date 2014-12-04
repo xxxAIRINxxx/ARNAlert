@@ -6,31 +6,33 @@
 //  Copyright (c) 2014 Airin. All rights reserved.
 //
 
-#import "ARNAlert.h"
-
-#import <BlocksKit+UIKit.h>
-
 #if !__has_feature(objc_arc)
 #error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-static NSString * const kARNAlertAlertViewStyleKey = @"ARNAlertAlertViewStyleKey";
-static NSString * const kARNAlertTextFieldBlockKey = @"ARNAlertTextFieldBlockKey";
-static NSString * const kARNAlertPlaceholderKey    = @"ARNAlertPlaceholderKey";
+#import "ARNAlert.h"
 
-static UIWindow         *window_          = nil;
-static UIViewController *controller_      = nil;
-static NSMutableArray   *alertQueueArray_ = nil;
+#import <UIKit/UIKit.h>
+#import <objc/message.h>
 
-@interface ARNAlert ()
+static NSString * const kARNAlertAlertKey = @"kARNAlertAlertKey";
+
+static UIWindow         *window_           = nil;
+static UIViewController *parentController_ = nil;
+static NSMutableArray   *alertQueueArray_  = nil;
+
+@implementation ARNAlertObject
+
+@end
+
+@interface ARNAlert () <UIAlertViewDelegate>
 
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, copy) NSString *message;
 
-@property (nonatomic, copy) NSString         *cancelTitle;
-@property (nonatomic, copy) ARNAlertBlock     cancelBlock;
-@property (nonatomic, strong) NSMutableArray *blockArray;
-@property (nonatomic, strong) NSMutableArray *textFieldBlockArray;
+@property (nonatomic) ARNAlertObject *cancelObj;
+@property (nonatomic) NSMutableArray *blockArray;
+@property (nonatomic) NSMutableArray *textFieldBlockArray;
 
 @end
 
@@ -47,61 +49,41 @@ static NSMutableArray   *alertQueueArray_ = nil;
 
 + (UIViewController *)parentController
 {
-    if (!window_) {
-        window_ = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        window_.windowLevel = UIWindowLevelAlert;
-    }
-    if (!controller_) {
-        controller_ = [[UIViewController alloc] init];
-        controller_.view.backgroundColor = [UIColor clearColor];
-        window_.rootViewController = controller_;
-    }
-    if (!window_.isKeyWindow) {
-        window_.alpha = 1;
-        [window_ makeKeyAndVisible];
+    if (!parentController_) {
+        parentController_ = [UIViewController new];
+        parentController_.view.backgroundColor = [UIColor clearColor];
     }
     if (!alertQueueArray_) {
         alertQueueArray_ = [NSMutableArray array];
     }
     
-    return controller_;
-}
-
-+ (void)dismiss
-{
-    if (![[self class] isiOS8orLater]) {
-        return;
+    if ([[self class] isiOS8orLater]) {
+        if (!window_) {
+            window_ = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+            window_.windowLevel = UIWindowLevelAlert;
+        }
+        window_.rootViewController = parentController_;
+        
+        if (!window_.isKeyWindow) {
+            window_.alpha = 1;
+            [window_ makeKeyAndVisible];
+        }
     }
     
-    if (!window_) {
-        return;
-    }
-    
-    if (alertQueueArray_.count) {
-        UIAlertController *alertController = (UIAlertController *)alertQueueArray_[0];
-        [[[self class] parentController] presentViewController:alertController animated:YES completion:nil];
-        [alertQueueArray_ removeObject:alertController];
-    } else {
-        window_.alpha = 0;
-        [window_.rootViewController.view removeFromSuperview];
-        window_.rootViewController = nil;
-        controller_ = nil;
-        window_     = nil;
-        UIWindow *mainWindow = [[UIApplication sharedApplication].delegate window];
-        [mainWindow makeKeyAndVisible];
-    }
+    return parentController_;
 }
 
 + (void)showNoActionAlertWithTitle:(NSString *)title
                            message:(NSString *)message
                        buttonTitle:(NSString *)buttonTitle
 {
-    if (!buttonTitle || !buttonTitle.length) {
-        buttonTitle = @"OK";
-    }
-    
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:title message:message];
-    [alert setCancelTitle:buttonTitle cancelBlock:^(id action) {}];
+
+    if (!buttonTitle || !buttonTitle.length) {
+        [alert setCancelTitle:@"OK" cancelBlock:nil];
+    } else {
+        [alert setCancelTitle:buttonTitle cancelBlock:nil];
+    }
     
     [alert show];
 }
@@ -115,7 +97,7 @@ static NSMutableArray   *alertQueueArray_ = nil;
 {
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:title message:message];
     
-    if (cancelBlock) {
+    if (cancelButtonTitle) {
         [alert setCancelTitle:cancelButtonTitle cancelBlock:cancelBlock];
     }
     
@@ -128,10 +110,11 @@ static NSMutableArray   *alertQueueArray_ = nil;
 {
     if (!(self = [super init])) { return nil; }
     
-    self.title      = title;
-    self.message    = message;
-    self.blockArray = [NSMutableArray array];
-    self.textFieldBlockArray = [NSMutableArray array];
+    _title   = title;
+    _message = message;
+    
+    _blockArray = [NSMutableArray array];
+    _textFieldBlockArray = [NSMutableArray array];
     
     return self;
 }
@@ -139,47 +122,64 @@ static NSMutableArray   *alertQueueArray_ = nil;
 - (void)setCancelTitle:(NSString *)cancelTitle
            cancelBlock:(ARNAlertBlock)cancelBlock
 {
-    self.cancelTitle = cancelTitle;
-    self.cancelBlock = cancelBlock;
+    ARNAlertObject *alertObj = [ARNAlertObject new];
+    
+    if (!cancelTitle || !cancelTitle.length) {
+        alertObj.title = @"Cancel";
+    } else {
+        alertObj.title = cancelTitle;
+    }
+    
+    if (!cancelBlock) {
+        alertObj.block = ^(id resultObj){};
+    } else {
+        alertObj.block = cancelBlock;
+    }
+    self.cancelObj = alertObj;
 }
 
 - (void)addActionTitle:(NSString *)actionTitle
            actionBlock:(ARNAlertBlock)actionBlock
 {
-    if (!actionTitle || !actionTitle.length) {
-        return;
+    ARNAlertObject *alertObj = [ARNAlertObject new];
+    
+    if (actionTitle) {
+        alertObj.title = actionTitle;
     }
+    
     if (!actionBlock) {
-        actionBlock = ^(id resultObj){};
+        alertObj.block = ^(id resultObj){};
+    } else {
+        alertObj.block = actionBlock;
     }
-    [self.blockArray addObject:@{[actionTitle copy]: [actionBlock copy]}];
+    
+    [self.blockArray addObject:alertObj];
 }
 
-// iOS7 is Only One Block
 - (void)addTextFieldWithPlaceholder:(NSString *)placeholder
-                     alertViewStyle:(UIAlertViewStyle)alertViewStyle
-                        actionBlock:(ARNAlertTextFieldBlock)actionBlock
 {
-    if (!actionBlock) {
-        return;
-    }
-    if (!placeholder) {
-        placeholder = @"";
+    ARNAlertObject *alertObj = [ARNAlertObject new];
+    
+    if (placeholder) {
+        alertObj.title = placeholder;
     }
     
     if ([[self class] isiOS8orLater]) {
-        [self.textFieldBlockArray addObject:@{kARNAlertPlaceholderKey : [placeholder copy],
-                                              kARNAlertTextFieldBlockKey : [actionBlock copy]}];
+        [self.textFieldBlockArray addObject:alertObj];
     } else {
-        [self.textFieldBlockArray removeAllObjects];
-        [self.textFieldBlockArray addObject:@{kARNAlertPlaceholderKey : [placeholder copy],
-                                              kARNAlertAlertViewStyleKey : @(alertViewStyle),
-                                              kARNAlertTextFieldBlockKey : [actionBlock copy]}];
+        if (self.textFieldBlockArray.count < 2) {
+            [self.textFieldBlockArray addObject:alertObj];
+        }
     }
 }
 
-- (void)shoAlertWithTitle:(NSString *)title
-                  message:(NSString *)messages
+- (void)show
+{
+    [self showAlertWithTitle:self.title message:self.message];
+}
+
+- (void)showAlertWithTitle:(NSString *)title
+                   message:(NSString *)messages
 {
     if (!self.title) {
         self.title = @"";
@@ -188,148 +188,185 @@ static NSMutableArray   *alertQueueArray_ = nil;
         self.message = @"";
     }
     
-    NSAssert(self.title || self.message, @"title and message nothing");
-    NSAssert(self.title.length || self.message.length, @"title and message noLength");
-    
-    if (self.cancelBlock && (!self.cancelTitle || !self.cancelTitle.length)) {
-        self.cancelTitle = @"Cancel";
-    }
-    
     if ([[self class] isiOS8orLater]) {
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:self.title
-                                                                                 message:self.message
-                                                                          preferredStyle:UIAlertControllerStyleAlert];
-        
-        __block NSMutableArray *textFields = [NSMutableArray array];
-        
-        if (self.textFieldBlockArray.count) {
-            for (int ai = 0; ai < self.textFieldBlockArray.count; ++ai) {
-                NSDictionary *blockDict = self.textFieldBlockArray[ai];
-                NSString *placeholder = blockDict[kARNAlertPlaceholderKey];
-                [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-                    textField.placeholder = placeholder;
-                    textField.bk_didEndEditingBlock = ^(UITextField *textField) {
-                        ARNAlertTextFieldBlock block = blockDict[kARNAlertTextFieldBlockKey];
-                        block(textField, @(ai));
-                    };
-                    [textFields addObject:textField];
-                }];
-            }
-            if (!self.blockArray.count) {
-                [alertController addAction:[UIAlertAction actionWithTitle:@"OK"
-                                                                    style:UIAlertActionStyleDefault
-                                                                  handler:^(UIAlertAction *action) {
-                                                                      [ARNAlert dismiss];
-                                                                  }]];
-            }
-        }
-        
-        if (self.cancelBlock) {
-            void (^block)() = [self.cancelBlock copy];
-            [alertController addAction:[UIAlertAction actionWithTitle:self.cancelTitle
-                                                                style:UIAlertActionStyleCancel
-                                                              handler:^(UIAlertAction *action) {
-                                                                  [ARNAlert dismiss];
-                                                                  if (textFields.count) {
-                                                                      block(textFields);
-                                                                  } else {
-                                                                      block(action);
-                                                                  }
-                                                              }]];
-        }
-        for (int i = 0; i < self.blockArray.count; ++i) {
-            NSDictionary *blockDict = self.blockArray[i];
-            NSString *key = [(NSString *)blockDict.allKeys[0] copy];
-            [alertController addAction:[UIAlertAction actionWithTitle:key
-                                                                style:UIAlertActionStyleDefault
-                                                              handler:^(UIAlertAction *action) {
-                                                                  [ARNAlert dismiss];
-                                                                  void (^block)() = blockDict[key];
-                                                                  if (textFields.count) {
-                                                                      block(textFields);
-                                                                  } else {
-                                                                      block(action);
-                                                                  }
-                                                              }]];
-        }
-        
-        if (!alertController.actions.count) {
-            [alertController addAction:[UIAlertAction actionWithTitle:@"OK"
-                                                                style:UIAlertActionStyleCancel
-                                                              handler:^(UIAlertAction *action) {
-                                                                  [ARNAlert dismiss];
-                                                              }]];
-        }
-        
-        if ([[self class] parentController].presentedViewController) {
-            [alertQueueArray_ addObject:alertController];
-        } else {
-            [[[self class] parentController] presentViewController:alertController animated:YES completion:nil];
-        }
+        [self showAlertController];
     } else {
-        UIAlertView *alert = [UIAlertView bk_alertViewWithTitle:self.title message:self.message];
-        
-        __block NSMutableArray *textFields = [NSMutableArray array];
-        if (self.textFieldBlockArray.count) {
-            NSDictionary *blockDict = self.textFieldBlockArray[0];
-            NSNumber *key = (NSNumber *)blockDict[kARNAlertAlertViewStyleKey];
-            [alert setAlertViewStyle:key.integerValue];
-            [alert bk_setDidShowBlock:^(UIAlertView *alertView) {
-                
-                ARNAlertTextFieldBlock block = blockDict[kARNAlertTextFieldBlockKey];
-                if ([alertView textFieldAtIndex:0]) {
-                    UITextField *textField = [alertView textFieldAtIndex:0];
-                    textField.bk_didEndEditingBlock = ^(UITextField *textField) {
-                        block(textField, @0);
-                    };
-                    [textFields addObject:textField];
-                }
-                if (key.integerValue == UIAlertViewStyleLoginAndPasswordInput) {
-                    UITextField *textField = [alertView textFieldAtIndex:1];
-                    textField.bk_didEndEditingBlock = ^(UITextField *textField) {
-                        block(textField, @1);
-                    };
-                    [textFields addObject:textField];
-                }
-            }];
-            
-            if (!self.blockArray.count) {
-                [alert bk_addButtonWithTitle:@"OK" handler:^{
-                }];
-            }
-        }
-        
-        if (self.cancelBlock) {
-            void (^block)() = [self.cancelBlock copy];
-            [alert bk_setCancelButtonWithTitle:self.cancelTitle handler:^{
-                if (textFields.count) {
-                    block(textFields);
-                } else {
-                    block(alert);
-                }
-            }];
-        }
-        
-        for (int i = 0; i < self.blockArray.count; ++i) {
-            NSDictionary *blockDict = self.blockArray[i];
-            NSString *key = [(NSString *)blockDict.allKeys[0] copy];
-            [alert bk_addButtonWithTitle:key handler:^{
-                void (^block)() = blockDict[key];
-                if (textFields.count) {
-                    block(textFields);
-                } else {
-                    block(alert);
-                }
-            }];
-        }
-        
-        [alert show];
+        [self showAlertView];
     }
 }
 
-- (void)show
+- (void)showAlertView
 {
-    [self shoAlertWithTitle:self.title message:self.message];
+    if (objc_getAssociatedObject([[self class] parentController], &kARNAlertAlertKey)) {
+        [alertQueueArray_ addObject:self];
+        return;
+    }
+    
+    UIAlertView *alertView = [UIAlertView new];
+    alertView.title    = self.title;
+    alertView.message  = self.message;
+    alertView.delegate = self;
+    
+    for (ARNAlertObject *alertObj in self.blockArray) {
+        [alertView addButtonWithTitle:alertObj.title];
+    }
+    if (self.cancelObj) {
+        alertView.cancelButtonIndex = [alertView addButtonWithTitle:self.cancelObj.title];
+    }
+    
+    if (self.textFieldBlockArray.count == 1) {
+        alertView.alertViewStyle = UIAlertViewStylePlainTextInput;
+    } else if (self.textFieldBlockArray.count == 2) {
+        alertView.alertViewStyle = UIAlertViewStyleLoginAndPasswordInput;
+    }
+    
+    objc_setAssociatedObject([[self class] parentController], &kARNAlertAlertKey, self, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [alertView show];
+}
+
+- (void)showAlertController
+{
+    if ([[self class] parentController].presentedViewController) {
+        [alertQueueArray_ addObject:self];
+        return;
+    }
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:self.title
+                                                                             message:self.message
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    
+    for (ARNAlertObject *alertObj in self.textFieldBlockArray) {
+        [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+            textField.placeholder = alertObj.title;
+        }];
+    }
+    
+    for (ARNAlertObject *alertObj in self.blockArray) {
+        ARNAlertBlock block = alertObj.block;
+        UIAlertAction *action = [UIAlertAction actionWithTitle:alertObj.title
+                                                         style:UIAlertActionStyleDefault
+                                                       handler:^(UIAlertAction *action) {
+                                                           if (alertController.textFields.count) {
+                                                               block(alertController.textFields);
+                                                           } else {
+                                                               block(action);
+                                                           }
+                                                           [ARNAlert dismiss];
+                                                       }];
+        [alertController addAction:action];
+    }
+    
+    if (self.cancelObj) {
+        ARNAlertBlock block = [self.cancelObj.block copy];
+        UIAlertAction *action = [UIAlertAction actionWithTitle:self.cancelObj.title
+                                                         style:UIAlertActionStyleCancel
+                                                       handler:^(UIAlertAction *action) {
+                                                           if (alertController.textFields.count) {
+                                                               block(alertController.textFields);
+                                                           } else {
+                                                               block(action);
+                                                           }
+                                                           [ARNAlert dismiss];
+                                                       }];
+        [alertController addAction:action];
+    }
+    
+    if (!self.blockArray.count && !self.cancelObj) {
+        [alertController addAction:[UIAlertAction actionWithTitle:@"OK"
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction *action) {
+                                                              [ARNAlert dismiss];
+                                                          }]];
+    }
+    
+    [[[self class] parentController] presentViewController:alertController animated:YES completion:nil];
+}
+
+#pragma mark - dismiss
+
++ (void)dismiss
+{
+    if ([[self class] isiOS8orLater]) {
+        [[self class] dismissAlertController];
+    } else {
+        [[self class] dismissAlertView];
+    }
+}
+
++ (void)dismissAlertController
+{
+    if (alertQueueArray_.count) {
+        ARNAlert *alert = alertQueueArray_[0];
+        [alertQueueArray_ removeObject:alert];
+        [alert showAlertWithTitle:alert.title message:alert.message];
+    } else {
+        window_.alpha = 0;
+        [window_.rootViewController.view removeFromSuperview];
+        window_.rootViewController = nil;
+        parentController_ = nil;
+        window_           = nil;
+        UIWindow *mainWindow = [[UIApplication sharedApplication].delegate window];
+        [mainWindow makeKeyAndVisible];
+    }
+}
+
++ (void)dismissAlertView
+{
+    objc_setAssociatedObject([[self class] parentController], &kARNAlertAlertKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    if (alertQueueArray_.count) {
+        ARNAlert *alert = alertQueueArray_[0];
+        [alertQueueArray_ removeObject:alert];
+        [alert showAlertWithTitle:alert.title message:alert.message];
+    }
+}
+
+#pragma mark - UIAlertViewDelegate
+
+/*
+ The field at index 0 will be the first text field (the single field or the login field), the field at index 1 will be the password field. */
+
+- (void)willPresentAlertView:(UIAlertView *)alertView
+{
+    if (!self.textFieldBlockArray.count) { return; }
+    
+    for (NSUInteger i = 0; i < 2; ++i) {
+        UITextField *textField = [alertView textFieldAtIndex:i];
+        if (textField) {
+            ARNAlertObject *alertObj = self.textFieldBlockArray[i];
+            textField.placeholder = alertObj.title;
+        }
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    id results = alertView;
+    
+    if (self.textFieldBlockArray.count) {
+        NSMutableArray *textFields = [NSMutableArray array];
+        
+        for (NSUInteger i = 0; i < 2; ++i) {
+            UITextField *textField = [alertView textFieldAtIndex:i];
+            if (textField) {
+                [textFields addObject:textField];
+            }
+        }
+        results = textFields;
+    }
+    
+    if (buttonIndex == alertView.cancelButtonIndex) {
+        if (self.cancelObj.block) {
+            self.cancelObj.block(results);
+        }
+    } else {
+        ARNAlertObject *alertObj = self.blockArray[buttonIndex];
+        if (alertObj.block) {
+            alertObj.block(results);
+        }
+    }
+    
+    [ARNAlert dismiss];
 }
 
 @end
