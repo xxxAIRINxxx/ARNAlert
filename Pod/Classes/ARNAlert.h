@@ -23,12 +23,12 @@ typedef void (^ARNAlertBlock)(id resultObj);
                            message:(NSString *)message
                        buttonTitle:(NSString *)buttonTitle;
 
-+ (void)shoAlertWithTitle:(NSString *)title
-                  message:(NSString *)message
-        cancelButtonTitle:(NSString *)cancelButtonTitle
-              cancelBlock:(ARNAlertBlock)cancelBlock
-            okButtonTitle:(NSString *)okButtonTitle
-                  okBlock:(ARNAlertBlock)okBlock;
++ (void)showAlertWithTitle:(NSString *)title
+                   message:(NSString *)message
+         cancelButtonTitle:(NSString *)cancelButtonTitle
+               cancelBlock:(ARNAlertBlock)cancelBlock
+             okButtonTitle:(NSString *)okButtonTitle
+                   okBlock:(ARNAlertBlock)okBlock;
 
 - (instancetype)initWithTitle:(NSString *)title message:(NSString *)message NS_DESIGNATED_INITIALIZER;
 

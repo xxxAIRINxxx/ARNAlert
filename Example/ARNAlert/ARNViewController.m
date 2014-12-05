@@ -44,16 +44,16 @@
 
 - (IBAction)doubleButtonAlert:(id)sender
 {
-    [ARNAlert shoAlertWithTitle:@"test Title"
-                        message:@"test Message"
-              cancelButtonTitle:@"Cancel"
-                    cancelBlock:^(id resultObj){
-                        NSLog(@"cancelBlock call!");
-                    }
-                  okButtonTitle:@"OK"
-                        okBlock:^(id resultObj){
-                            NSLog(@"okBlock call!");
-                        }];
+    [ARNAlert showAlertWithTitle:@"test Title"
+                         message:@"test Message"
+               cancelButtonTitle:@"Cancel"
+                     cancelBlock:^(id resultObj){
+                         NSLog(@"cancelBlock call!");
+                     }
+                   okButtonTitle:@"OK"
+                         okBlock:^(id resultObj){
+                             NSLog(@"okBlock call!");
+                         }];
 }
 
 - (IBAction)tripleButtonAlert:(id)sender
