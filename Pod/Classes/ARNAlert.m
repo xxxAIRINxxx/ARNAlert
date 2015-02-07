@@ -38,41 +38,6 @@ static NSMutableArray   *alertQueueArray_  = nil;
 
 @implementation ARNAlert
 
-+ (BOOL)isiOS8orLater
-{
-    if ( ([[[UIDevice currentDevice] systemVersion] compare:@"8" options:NSNumericSearch] != NSOrderedAscending)) {
-        return YES;
-    } else {
-        return NO;
-    }
-}
-
-+ (UIViewController *)parentController
-{
-    if (!parentController_) {
-        parentController_ = [UIViewController new];
-        parentController_.view.backgroundColor = [UIColor clearColor];
-    }
-    if (!alertQueueArray_) {
-        alertQueueArray_ = [NSMutableArray array];
-    }
-    
-    if ([[self class] isiOS8orLater]) {
-        if (!window_) {
-            window_ = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-            window_.windowLevel = UIWindowLevelAlert;
-        }
-        window_.rootViewController = parentController_;
-        
-        if (!window_.isKeyWindow) {
-            window_.alpha = 1;
-            [window_ makeKeyAndVisible];
-        }
-    }
-    
-    return parentController_;
-}
-
 + (void)showNoActionAlertWithTitle:(NSString *)title
                            message:(NSString *)message
                        buttonTitle:(NSString *)buttonTitle
@@ -158,12 +123,15 @@ static NSMutableArray   *alertQueueArray_  = nil;
     [self.blockArray addObject:alertObj];
 }
 
-- (void)addTextFieldWithPlaceholder:(NSString *)placeholder
+- (void)addTextFieldWithPlaceholder:(NSString *)placeholder fillInText:(NSString *)text
 {
     ARNAlertObject *alertObj = [ARNAlertObject new];
     
     if (placeholder) {
-        alertObj.title = placeholder;
+        alertObj.placeholder = placeholder;
+    }
+    if (text) {
+        alertObj.title = text;
     }
     
     if ([[self class] isiOS8orLater]) {
@@ -178,6 +146,43 @@ static NSMutableArray   *alertQueueArray_  = nil;
 - (void)show
 {
     [self showAlertWithTitle:self.title message:self.message];
+}
+
+#pragma mark - Private
+
++ (BOOL)isiOS8orLater
+{
+    if ( ([[[UIDevice currentDevice] systemVersion] compare:@"8" options:NSNumericSearch] != NSOrderedAscending)) {
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
++ (UIViewController *)parentController
+{
+    if (!parentController_) {
+        parentController_ = [UIViewController new];
+        parentController_.view.backgroundColor = [UIColor clearColor];
+    }
+    if (!alertQueueArray_) {
+        alertQueueArray_ = [NSMutableArray array];
+    }
+    
+    if ([[self class] isiOS8orLater]) {
+        if (!window_) {
+            window_ = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+            window_.windowLevel = UIWindowLevelAlert;
+        }
+        window_.rootViewController = parentController_;
+        
+        if (!window_.isKeyWindow) {
+            window_.alpha = 1;
+            [window_ makeKeyAndVisible];
+        }
+    }
+    
+    return parentController_;
 }
 
 - (void)showAlertWithTitle:(NSString *)title message:(NSString *)messages
@@ -203,16 +208,32 @@ static NSMutableArray   *alertQueueArray_  = nil;
         return;
     }
     
-    UIAlertView *alertView = [UIAlertView new];
-    alertView.title    = self.title;
-    alertView.message  = self.message;
-    alertView.delegate = self;
-    
-    for (ARNAlertObject *alertObj in self.blockArray) {
-        [alertView addButtonWithTitle:alertObj.title];
-    }
+    NSString *cancelButtonTitle = nil;
     if (self.cancelObj) {
-        alertView.cancelButtonIndex = [alertView addButtonWithTitle:self.cancelObj.title];
+        cancelButtonTitle = self.cancelObj.title;
+    } else if (self.textFieldBlockArray.count) {
+        [self setCancelTitle:nil cancelBlock:nil];
+        cancelButtonTitle = self.cancelObj.title;
+    }
+    
+    __block NSString *otherButtonTitle = nil;
+    NSMutableArray *otherButtonTitles = [NSMutableArray array];
+    [self.blockArray enumerateObjectsUsingBlock:^(ARNAlertObject *alertObj, NSUInteger idx, BOOL *stop) {
+        if (idx == 0) {
+            otherButtonTitle = alertObj.title;
+        } else {
+            [otherButtonTitles addObject:alertObj.title];
+        }
+    }];
+    
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:self.title
+                                                        message:self.message
+                                                       delegate:self
+                                              cancelButtonTitle:cancelButtonTitle
+                                              otherButtonTitles:otherButtonTitle, nil];
+    
+    for (NSString *buttonTitle in otherButtonTitles) {
+        [alertView addButtonWithTitle:buttonTitle];
     }
     
     if (self.textFieldBlockArray.count == 1) {
@@ -236,13 +257,14 @@ static NSMutableArray   *alertQueueArray_  = nil;
                                                                              message:self.message
                                                                       preferredStyle:UIAlertControllerStyleAlert];
     
-    for (ARNAlertObject *alertObj in self.textFieldBlockArray) {
+    [self.textFieldBlockArray enumerateObjectsUsingBlock:^(ARNAlertObject *alertObj, NSUInteger idx, BOOL *stop) {
         [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-            textField.placeholder = alertObj.title;
+            textField.placeholder = alertObj.placeholder;
+            textField.text = alertObj.title;
         }];
-    }
+    }];
     
-    for (ARNAlertObject *alertObj in self.blockArray) {
+    [self.blockArray enumerateObjectsUsingBlock:^(ARNAlertObject *alertObj, NSUInteger idx, BOOL *stop) {
         ARNAlertBlock block = alertObj.block;
         UIAlertAction *action = [UIAlertAction actionWithTitle:alertObj.title
                                                          style:UIAlertActionStyleDefault
@@ -255,7 +277,7 @@ static NSMutableArray   *alertQueueArray_  = nil;
                                                            [ARNAlert dismiss];
                                                        }];
         [alertController addAction:action];
-    }
+    }];
     
     if (self.cancelObj) {
         ARNAlertBlock block = [self.cancelObj.block copy];
@@ -327,17 +349,28 @@ static NSMutableArray   *alertQueueArray_  = nil;
 /*
  The field at index 0 will be the first text field (the single field or the login field), the field at index 1 will be the password field. */
 
+- (BOOL)alertViewShouldEnableFirstOtherButton:(UIAlertView *)alertView
+{
+    if (self.textFieldBlockArray.count) {
+        NSInteger textLength = [[[alertView textFieldAtIndex:0] text] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
+        if (!textLength) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
 - (void)willPresentAlertView:(UIAlertView *)alertView
 {
     if (!self.textFieldBlockArray.count) { return; }
     
-    for (NSUInteger i = 0; i < self.textFieldBlockArray.count; ++i) {
-        UITextField *textField = [alertView textFieldAtIndex:i];
+    [self.textFieldBlockArray enumerateObjectsUsingBlock:^(ARNAlertObject *alertObj, NSUInteger idx, BOOL *stop) {
+        UITextField *textField = [alertView textFieldAtIndex:idx];
         if (textField) {
-            ARNAlertObject *alertObj = self.textFieldBlockArray[i];
-            textField.placeholder = alertObj.title;
+            textField.placeholder = alertObj.placeholder;
+            textField.text        = alertObj.title;
         }
-    }
+    }];
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -347,12 +380,12 @@ static NSMutableArray   *alertQueueArray_  = nil;
     if (self.textFieldBlockArray.count) {
         NSMutableArray *textFields = [NSMutableArray array];
         
-        for (NSUInteger i = 0; i < self.textFieldBlockArray.count; ++i) {
-            UITextField *textField = [alertView textFieldAtIndex:i];
+        [self.textFieldBlockArray enumerateObjectsUsingBlock:^(ARNAlertObject *alertObj, NSUInteger idx, BOOL *stop) {
+            UITextField *textField = [alertView textFieldAtIndex:idx];
             if (textField) {
                 [textFields addObject:textField];
             }
-        }
+        }];
         results = textFields;
     }
     
@@ -361,9 +394,17 @@ static NSMutableArray   *alertQueueArray_  = nil;
             self.cancelObj.block(results);
         }
     } else {
-        ARNAlertObject *alertObj = self.blockArray[buttonIndex];
-        if (alertObj.block) {
-            alertObj.block(results);
+        NSInteger resultIndex = buttonIndex;
+        if (self.textFieldBlockArray.count || self.cancelObj.block) {
+            // cancel button or textfield index = 0
+            resultIndex--;
+        }
+        
+        if (self.blockArray.count > resultIndex) {
+            ARNAlertObject *alertObj = self.blockArray[resultIndex];
+            if (alertObj.block) {
+                alertObj.block(results);
+            }
         }
     }
     

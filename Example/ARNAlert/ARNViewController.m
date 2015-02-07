@@ -99,10 +99,10 @@
 {
     ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
     
-    [alert addTextFieldWithPlaceholder:@"place1"];
-    [alert addTextFieldWithPlaceholder:@"place2"];
+    [alert addTextFieldWithPlaceholder:@"place1" fillInText:@"tex1"];
+    [alert addTextFieldWithPlaceholder:@"place2" fillInText:@"tex2"];
     // iOS7 is Nothing
-    [alert addTextFieldWithPlaceholder:@"place3"];
+    [alert addTextFieldWithPlaceholder:@"place3" fillInText:@"tex3"];
     
     [alert addActionTitle:@"button1"
               actionBlock:^(NSArray *texitFields) {
