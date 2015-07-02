@@ -29,6 +29,7 @@ static NSMutableArray   *alertQueueArray_  = nil;
 
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, copy) NSString *message;
+@property (nonatomic, strong) UIAlertView *alertView;
 
 @property (nonatomic) ARNAlertObject *cancelObj;
 @property (nonatomic) NSMutableArray *blockArray;
@@ -244,6 +245,7 @@ static NSMutableArray   *alertQueueArray_  = nil;
     
     objc_setAssociatedObject([[self class] parentController], &kARNAlertAlertKey, self, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [alertView show];
+    self.alertView = alertView;
 }
 
 - (void)showAlertController
@@ -407,7 +409,11 @@ static NSMutableArray   *alertQueueArray_  = nil;
             }
         }
     }
-    
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    self.alertView = nil;
     [ARNAlert dismiss];
 }
 
