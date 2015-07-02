@@ -26,22 +26,22 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ```objective-c
 
-[ARNAlert shoAlertWithTitle:@"test Title"
-                    message:@"test Message"
-          cancelButtonTitle:@"Cancel"
-                cancelBlock:^(id action){
-                    NSLog(@"cancelBlock call!");
+[ARNAlert showAlertWithTitle:@"test Title"
+                     message:@"test Message"
+           cancelButtonTitle:@"Cancel"
+                 cancelBlock:^(id action){
+                     NSLog(@"cancelBlock call!");
 
-                    // iOS8 : UIAlertController addAction(UIAlertActionStyleCancel)
-					// iOS7 : UIAlertView clickedButtonAtIndex(cancelButtonIndex)
-                }
-              okButtonTitle:@"OK"
-                    okBlock:^(id action){
-          			NSLog(@"okBlock call!");
+                     // iOS8 : UIAlertController addAction(UIAlertActionStyleCancel)
+                     // iOS7 : UIAlertView clickedButtonAtIndex(cancelButtonIndex)
+                 }
+               okButtonTitle:@"OK"
+                     okBlock:^(id action){
+          		  	 NSLog(@"okBlock call!");
 
-                    // iOS8 : UIAlertController addAction(UIAlertActionStyleDefault)
-      				// iOS7 : UIAlertView clickedButtonAtIndex(buttonIndex)
-                    }];
+                     // iOS8 : UIAlertController addAction(UIAlertActionStyleDefault)
+      				 // iOS7 : UIAlertView clickedButtonAtIndex(buttonIndex)
+}];
 
 ```
 
@@ -66,6 +66,49 @@ ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Title" message:@"test M
 
 ```
 
+### Show Some Textfield Alert
+
+```objective-c
+
+    ARNAlert *alert = [[ARNAlert alloc] initWithTitle:@"test Text " message:@"test Message"];
+
+    [alert addTextFieldWithPlaceholder:@"place1" fillInText:@"tex1"];
+    [alert addTextFieldWithPlaceholder:@"place2" fillInText:@"tex2"];
+    // iOS7 is Nothing
+    [alert addTextFieldWithPlaceholder:@"place3" fillInText:@"tex3"];
+
+    [alert addActionTitle:@"button1"
+              actionBlock:^(NSArray *texitFields) {
+                  NSLog(@"button1 tapped!");
+                  NSLog(@"texitFields : %@", texitFields);
+                  for (int i = 0; i < texitFields.count; ++i) {
+                      UITextField *textField = texitFields[i];
+                      NSLog(@"texitField.text : %@", textField.text);
+                  }
+              }];
+    [alert addActionTitle:@"button2"
+              actionBlock:^(NSArray *texitFields) {
+                  NSLog(@"button2 tapped!");
+                  NSLog(@"texitFields : %@", texitFields);
+                  for (int i = 0; i < texitFields.count; ++i) {
+                      UITextField *textField = texitFields[i];
+                      NSLog(@"texitField.text : %@", textField.text);
+                  }
+              }];
+    [alert setCancelTitle:@"Cancel"
+              cancelBlock:^(NSArray *texitFields) {
+                  NSLog(@"cancel Button tapped!");
+                  NSLog(@"texitFields : %@", texitFields);
+                  for (int i = 0; i < texitFields.count; ++i) {
+                      UITextField *textField = texitFields[i];
+                      NSLog(@"texitField.text : %@", textField.text);
+                  }
+              }];
+
+    [alert show];
+
+```
+
 ## Requirements
 
 * iOS 7.0+
@@ -81,4 +124,3 @@ it, simply add the following line to your Podfile:
 ## License
 
 ARNAlert is available under the MIT license. See the LICENSE file for more info.
-
