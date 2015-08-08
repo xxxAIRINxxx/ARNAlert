@@ -271,12 +271,12 @@ static NSMutableArray   *alertQueueArray_  = nil;
         UIAlertAction *action = [UIAlertAction actionWithTitle:alertObj.title
                                                          style:UIAlertActionStyleDefault
                                                        handler:^(UIAlertAction *action) {
+                                                           [ARNAlert dismiss];
                                                            if (alertController.textFields.count) {
                                                                block(alertController.textFields);
                                                            } else {
                                                                block(action);
                                                            }
-                                                           [ARNAlert dismiss];
                                                        }];
         [alertController addAction:action];
     }];
@@ -286,12 +286,12 @@ static NSMutableArray   *alertQueueArray_  = nil;
         UIAlertAction *action = [UIAlertAction actionWithTitle:self.cancelObj.title
                                                          style:UIAlertActionStyleCancel
                                                        handler:^(UIAlertAction *action) {
+                                                           [ARNAlert dismiss];
                                                            if (alertController.textFields.count) {
                                                                block(alertController.textFields);
                                                            } else {
                                                                block(action);
                                                            }
-                                                           [ARNAlert dismiss];
                                                        }];
         [alertController addAction:action];
     }
